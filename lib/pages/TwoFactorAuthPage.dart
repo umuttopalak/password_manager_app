@@ -26,17 +26,14 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
       );
 
       if (isVerified) {
-        // Doğrulama başarılı, kullanıcıyı ana sayfaya yönlendirin veya bilgi gösterin
         Navigator.pushReplacementNamed(context, '/home');
       } else {
-        // Hata mesajı göster
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text("Doğrulama başarısız. Lütfen tekrar deneyin.")),
         );
       }
     } else {
-      // Kodu eksik girdiğinde uyarı ver
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Lütfen 6 haneli kodu girin")),
       );
@@ -46,39 +43,52 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("2 Adımlı Doğrulama",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(
+                "2 Adımlı Doğrulama",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 20),
-              Text("Telefonunuza gönderilen kodu girin.",
-                  textAlign: TextAlign.center),
-              SizedBox(height: 20),
+              Text(
+                "Telefonunuza gönderilen kodu girin.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black54),
+              ),
+              SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(6, (index) => _buildOtpBox(index)),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _verifyOtp,
-                child: Text("Doğrula"),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: Text("Doğrula", style: TextStyle(color: Colors.white)),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 15),
               TextButton(
                 onPressed: () {
                   // Kod tekrar gönderme işlevi
                 },
-                child: Text("Kod Gönderilmedi mi? Tekrar Gönder"),
+                child: Text(
+                  "Kod Gönderilmedi mi? Tekrar Gönder",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
@@ -90,23 +100,27 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
   Widget _buildOtpBox(int index) {
     return Container(
       width: 40,
-      height: 40,
+      height: 50,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
-      ),
       child: TextField(
         controller: _otpControllers[index],
         textAlign: TextAlign.center,
         maxLength: 1,
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(counterText: ""),
+        decoration: InputDecoration(
+          counterText: "",
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.black12),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.black54),
+          ),
+        ),
         onChanged: (value) {
           if (value.length == 1 && index < 5) {
-            FocusScope.of(context).nextFocus(); // Bir sonraki kutuya geç
+            FocusScope.of(context).nextFocus();
           } else if (value.isEmpty && index > 0) {
-            FocusScope.of(context).previousFocus(); // Bir önceki kutuya dön
+            FocusScope.of(context).previousFocus();
           }
         },
       ),

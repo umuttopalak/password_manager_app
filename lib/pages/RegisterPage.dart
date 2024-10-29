@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:password_manager_app/services/auth_service.dart';
 
@@ -9,7 +7,6 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // TextEditingController ile her alanı kontrol edebiliriz
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -21,54 +18,97 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Kayıt Ol",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(
+                "Kayıt Ol",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 20),
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Ad Soyad'),
+                decoration: InputDecoration(
+                  labelText: 'Ad Soyad',
+                  labelStyle: TextStyle(color: Colors.black54),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black12),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black54),
+                  ),
+                ),
               ),
               SizedBox(height: 10),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'E-posta'),
+                decoration: InputDecoration(
+                  labelText: 'E-posta',
+                  labelStyle: TextStyle(color: Colors.black54),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black12),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black54),
+                  ),
+                ),
               ),
               SizedBox(height: 10),
               TextField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Şifre'),
+                decoration: InputDecoration(
+                  labelText: 'Şifre',
+                  labelStyle: TextStyle(color: Colors.black54),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black12),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black54),
+                  ),
+                ),
               ),
               SizedBox(height: 10),
               TextField(
                 controller: confirmPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: 'Şifreyi Onayla'),
+                decoration: InputDecoration(
+                  labelText: 'Şifreyi Onayla',
+                  labelStyle: TextStyle(color: Colors.black54),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black12),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black54),
+                  ),
+                ),
               ),
+              SizedBox(height: 10),
               Row(
                 children: [
                   Checkbox(
                     value: isTermsAccepted,
                     onChanged: (value) {
                       setState(() {
-                        isTermsAccepted = !isTermsAccepted;
+                        isTermsAccepted = value ?? false;
                       });
                     },
                   ),
                   Expanded(
-                      child: Text("Şartları ve Koşulları Kabul Ediyorum.")),
+                    child: Text(
+                      "Şartları ve Koşulları Kabul Ediyorum.",
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  // Girdi doğrulama ve kayıt fonksiyonuna yönlendirme
                   if (isTermsAccepted &&
                       passwordController.text ==
                           confirmPasswordController.text) {
@@ -96,21 +136,27 @@ class _RegisterPageState extends State<RegisterPage> {
                     );
                   }
                 },
-                child: Text("Kaydol"),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black87,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                child: Text("Kaydol", style: TextStyle(color: Colors.white)),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 15),
               GestureDetector(
                 onTap: () {
                   Navigator.popAndPushNamed(context, '/login');
                 },
-                child: Text("Zaten Hesabın Var? Giriş Yap",
-                    style: TextStyle(color: Colors.blue)),
+                child: Text(
+                  "Zaten Hesabın Var? Giriş Yap",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ],
           ),
