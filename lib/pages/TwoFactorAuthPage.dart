@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:password_manager_app/services/auth_service.dart';
 
@@ -79,8 +81,21 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
               ),
               SizedBox(height: 15),
               TextButton(
-                onPressed: () {
-                  // Kod tekrar gönderme işlevi
+                onPressed: () async {
+                  bool success =
+                      await AuthService().resendVerifyCode(email: widget.email);
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text(widget.email + "adresine doğrulama kodu tekrar yollandı")),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content:
+                              Text("2FA Kodu tekrar yollanırken hata oluştu!")),
+                    );
+                  }
                 },
                 child: Text(
                   "Kod Gönderilmedi mi? Tekrar Gönder",
