@@ -11,7 +11,8 @@ class AuthService {
   bool isLoggedIn = false;
   String? authToken;
 
-  final String baseUrl = 'https://wasteful-amelie-topalak-f4ba58c0.koyeb.app/api/authentication';
+  final String baseUrl =
+      'https://wasteful-amelie-topalak-f4ba58c0.koyeb.app/api/authentication';
 
   Future<bool> register({
     required String email,
@@ -95,6 +96,29 @@ class AuthService {
       }
     } catch (e) {
       debugPrint("2FA doğrulama hatası: $e");
+      return false;
+    }
+  }
+
+  Future<bool> resendVerifyCode({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/resend-2fa'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("2FA yeniden gönderme başarılı!");
+        return true;
+      } else {
+        debugPrint("2FA yeniden gönderme hatası: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("2FA yeniden gönderilirken hata aldı: $e");
       return false;
     }
   }
