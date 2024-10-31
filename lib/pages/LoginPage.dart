@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager_app/services/auth_service.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  LoginPage({super.key});
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +65,7 @@ class LoginPage extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // Şifremi Unuttum İşlevi
+                      Navigator.pushNamed(context, '/forgot-password', arguments: emailController.text);
                     },
                     child: Text("Şifremi Unuttum",
                         style: TextStyle(color: Colors.black54)),
@@ -67,23 +73,31 @@ class LoginPage extends StatelessWidget {
                 ),
                 SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () async {
-                    bool success = await AuthService().login(
-                      email: emailController.text,
-                      password: passwordController.text,
-                    );
-                    if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Giriş başarılı!")),
-                      );
-                      Navigator.pushNamed(context, '/2fa',
-                          arguments: emailController.text);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Giriş başarısız!")),
-                      );
-                    }
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          bool success = await AuthService().login(
+                            email: emailController.text,
+                            password: passwordController.text,
+                          );
+                          setState(() {
+                            isLoading = false;
+                          });
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Giriş başarılı!")),
+                            );
+                            Navigator.pushNamed(context, '/2fa',
+                                arguments: emailController.text);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Giriş başarısız!")),
+                            );
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black87,
                     minimumSize: Size(double.infinity, 50),
@@ -91,7 +105,18 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text("Giriş Yap", style: TextStyle(color: Colors.white)),
+                  child: isLoading
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.hourglass_empty, color: Colors.white),
+                            SizedBox(width: 10),
+                            Text("Yükleniyor...",
+                                style: TextStyle(color: Colors.white)),
+                          ],
+                        )
+                      : Text("Giriş Yap",
+                          style: TextStyle(color: Colors.white)),
                 ),
                 SizedBox(height: 20),
                 GestureDetector(
