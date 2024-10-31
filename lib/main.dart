@@ -4,17 +4,20 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:password_manager_app/pages/ForgotPasswordPage.dart';
 import 'package:password_manager_app/pages/LoginPage.dart';
 import 'package:password_manager_app/pages/RegisterPage.dart';
+import 'package:password_manager_app/pages/ResetPasswordPage.dart';
 import 'package:password_manager_app/pages/TwoFactorAuthPage.dart';
+import 'package:password_manager_app/pages/VerifyResetCodePage.dart';
 
 Future<void> main() async {
   // Firebase başlatmadan önce widgetları bağlayın
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Firebase başlatma
   await Firebase.initializeApp();
-  
+
   // Crashlytics ayarları
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -45,7 +48,21 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
-        '/2fa': (context) => TwoFactorAuthPage(email: ModalRoute.of(context)!.settings.arguments as String),
+        '/2fa': (context) => TwoFactorAuthPage(
+            email: ModalRoute.of(context)!.settings.arguments as String),
+        '/forgot-password': (context) => ForgotPasswordPage(
+            email: ModalRoute.of(context)!.settings.arguments as String),
+        '/verify-reset-code': (context) {
+          final email = ModalRoute.of(context)!.settings.arguments as String?;
+          return VerifyResetCodePage(email: email ?? "");
+        },
+        '/reset-password': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+          final email = args['email']!;
+          final code = args['code']!;
+          return ResetPasswordPage(email: email, code: code);
+        },
       },
     );
   }
