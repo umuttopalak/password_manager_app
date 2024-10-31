@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager_app/services/auth_service.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  final String email;
+  final String code;
+
+  ResetPasswordPage({required this.email, required this.code});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController emailController = TextEditingController();
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool isLoading = false;
+
+  Future<void> _resetPassword() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Şifreler eşleşmiyor")),
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    bool success = await AuthService().resetPassword(
+      email: widget.email,
+      code: widget.code,
+      newPassword: passwordController.text,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Şifre başarıyla sıfırlandı!")),
+      );
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Şifre sıfırlama başarısız")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Giriş Yap",
+                  "Şifreyi Sıfırla",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -34,9 +72,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 40),
                 TextField(
-                  controller: emailController,
+                  controller: passwordController,
+                  obscureText: true,
                   decoration: InputDecoration(
-                    labelText: "E-posta veya Kullanıcı Adı",
+                    labelText: "Yeni Şifre",
                     labelStyle: TextStyle(color: Colors.black54),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.black12),
@@ -48,10 +87,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 SizedBox(height: 15),
                 TextField(
-                  controller: passwordController,
+                  controller: confirmPasswordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: "Şifre",
+                    labelText: "Şifreyi Onayla",
                     labelStyle: TextStyle(color: Colors.black54),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.black12),
@@ -61,43 +100,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/forgot-password', arguments: emailController.text);
-                    },
-                    child: Text("Şifremi Unuttum",
-                        style: TextStyle(color: Colors.black54)),
-                  ),
-                ),
                 SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          bool success = await AuthService().login(
-                            email: emailController.text,
-                            password: passwordController.text,
-                          );
-                          setState(() {
-                            isLoading = false;
-                          });
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Giriş başarılı!")),
-                            );
-                            Navigator.pushNamed(context, '/2fa',
-                                arguments: emailController.text);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Giriş başarısız!")),
-                            );
-                          }
-                        },
+                  onPressed: isLoading ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black87,
                     minimumSize: Size(double.infinity, 50),
@@ -111,25 +116,12 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Icon(Icons.hourglass_empty, color: Colors.white),
                             SizedBox(width: 10),
-                            Text("Yükleniyor...",
+                            Text("Sıfırlanıyor...",
                                 style: TextStyle(color: Colors.white)),
                           ],
                         )
-                      : Text("Giriş Yap",
+                      : Text("Şifreyi Sıfırla",
                           style: TextStyle(color: Colors.white)),
-                ),
-                SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.popAndPushNamed(context, '/register');
-                  },
-                  child: Text(
-                    "Hesabın Yok Mu? Kaydol",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
                 ),
               ],
             ),

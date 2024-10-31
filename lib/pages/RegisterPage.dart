@@ -14,6 +14,7 @@ class _RegisterPageState extends State<RegisterPage> {
       TextEditingController();
 
   bool isTermsAccepted = false;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -108,34 +109,42 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
-                  if (isTermsAccepted &&
-                      passwordController.text ==
-                          confirmPasswordController.text) {
-                    bool success = await AuthService().register(
-                      email: emailController.text,
-                      password: passwordController.text,
-                      fullName: nameController.text,
-                    );
-                    if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Kayıt başarılı!")),
-                      );
-                      Navigator.popAndPushNamed(context, '/login');
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Kayıt başarısız!")),
-                      );
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            "Şartları kabul edin ve şifrelerin aynı olduğundan emin olun."),
-                      ),
-                    );
-                  }
-                },
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        if (isTermsAccepted &&
+                            passwordController.text ==
+                                confirmPasswordController.text) {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          bool success = await AuthService().register(
+                            email: emailController.text,
+                            password: passwordController.text,
+                            fullName: nameController.text,
+                          );
+                          setState(() {
+                            isLoading = false;
+                          });
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Kayıt başarılı!")),
+                            );
+                            Navigator.popAndPushNamed(context, '/login');
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Kayıt başarısız!")),
+                            );
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Şartları kabul edin ve şifrelerin aynı olduğundan emin olun."),
+                            ),
+                          );
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black87,
                   minimumSize: Size(double.infinity, 50),
@@ -143,7 +152,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text("Kaydol", style: TextStyle(color: Colors.white)),
+                child: isLoading
+                    ? Icon(Icons.hourglass_empty, color: Colors.white)
+                    : Text("Kaydol", style: TextStyle(color: Colors.white)),
               ),
               SizedBox(height: 15),
               GestureDetector(

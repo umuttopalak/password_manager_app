@@ -1,10 +1,8 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:password_manager_app/services/auth_service.dart';
 
 class TwoFactorAuthPage extends StatefulWidget {
-  final String email; // Kullanıcının e-postasını almak için
+  final String email;
   TwoFactorAuthPage({required this.email});
 
   @override
@@ -15,6 +13,8 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
   final List<TextEditingController> _otpControllers =
       List.generate(6, (_) => TextEditingController());
   final AuthService _authService = AuthService();
+  bool isVerifying = false;
+  bool isResending = false;
 
   // Kodu birleştirip doğrulama işlevini çağır
   void _verifyOtp() async {
@@ -22,10 +22,18 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
         _otpControllers.map((controller) => controller.text).join();
 
     if (otpCode.length == 6) {
+      setState(() {
+        isVerifying = true;
+      });
+
       bool isVerified = await _authService.verifyTwoFactorCode(
         email: widget.email,
         code: otpCode,
       );
+
+      setState(() {
+        isVerifying = false;
+      });
 
       if (isVerified) {
         Navigator.pushReplacementNamed(context, '/home');
@@ -38,6 +46,30 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Lütfen 6 haneli kodu girin")),
+      );
+    }
+  }
+
+  Future<void> _resendCode() async {
+    setState(() {
+      isResending = true;
+    });
+
+    bool success = await AuthService().resendVerifyCode(email: widget.email);
+
+    setState(() {
+      isResending = false;
+    });
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                "${widget.email} adresine doğrulama kodu tekrar yollandı")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("2FA Kodu tekrar yollanırken hata oluştu!")),
       );
     }
   }
@@ -69,7 +101,7 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
               ),
               SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _verifyOtp,
+                onPressed: isVerifying ? null : _verifyOtp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black87,
                   minimumSize: Size(double.infinity, 50),
@@ -77,33 +109,38 @@ class _TwoFactorAuthPageState extends State<TwoFactorAuthPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text("Doğrula", style: TextStyle(color: Colors.white)),
+                child: isVerifying
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.hourglass_empty, color: Colors.white),
+                          SizedBox(width: 10),
+                          Text("Doğrulanıyor...",
+                              style: TextStyle(color: Colors.white)),
+                        ],
+                      )
+                    : Text("Doğrula", style: TextStyle(color: Colors.white)),
               ),
               SizedBox(height: 15),
               TextButton(
-                onPressed: () async {
-                  bool success =
-                      await AuthService().resendVerifyCode(email: widget.email);
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text(widget.email + "adresine doğrulama kodu tekrar yollandı")),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text("2FA Kodu tekrar yollanırken hata oluştu!")),
-                    );
-                  }
-                },
-                child: Text(
-                  "Kod Gönderilmedi mi? Tekrar Gönder",
-                  style: TextStyle(
-                    color: Colors.black87,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
+                onPressed: isResending ? null : _resendCode,
+                child: isResending
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.hourglass_empty, color: Colors.black87),
+                          SizedBox(width: 10),
+                          Text("Tekrar Gönderiliyor...",
+                              style: TextStyle(color: Colors.black87)),
+                        ],
+                      )
+                    : Text(
+                        "Kod Gönderilmedi mi? Tekrar Gönder",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
               ),
             ],
           ),

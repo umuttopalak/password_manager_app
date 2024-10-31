@@ -29,7 +29,6 @@ class AuthService {
           'name': fullName,
         }),
       );
-      print(response.body);
       if (response.statusCode == 201) {
         debugPrint("Kayıt başarılı!");
         return true;
@@ -119,6 +118,85 @@ class AuthService {
       }
     } catch (e) {
       debugPrint("2FA yeniden gönderilirken hata aldı: $e");
+      return false;
+    }
+  }
+
+  Future<bool> sendForgotPasswordCode({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Şifre sıfırlama kodu gönderildi.");
+        return true;
+      } else {
+        debugPrint("Şifre sıfırlama kodu gönderme hatası: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Şifre sıfırlama kodu gönderme hatası: $e");
+      return false;
+    }
+  }
+
+  Future<bool> verifyForgotPasswordCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/verify-forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Şifre sıfırlama kodu doğrulandı.");
+        return true;
+      } else {
+        debugPrint("Şifre sıfırlama kodu doğrulama hatası: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Şifre sıfırlama kodu doğrulama hatası: $e");
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'code': code,
+          'new_password': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Şifre sıfırlama başarılı.");
+        return true;
+      } else {
+        debugPrint("Şifre sıfırlama hatası: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Şifre sıfırlama hatası: $e");
       return false;
     }
   }
